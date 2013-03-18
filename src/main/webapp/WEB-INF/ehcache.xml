@@ -1,10 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?> 
-
+<?xml version="1.0" encoding="UTF-8"?>
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">    
+	xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
+	dynamicConfig="true" monitoring="autodetect">
 
-    <defaultCache eternal="true" maxElementsInMemory="100" overflowToDisk="false" />           
+	<cacheManagerPeerListenerFactory
+		class="org.terracotta.ehcachedx.monitor.probe.ProbePeerListenerFactory"
+		properties="monitorAddress=localhost, monitorPort=9889, memoryMeasurement=true" />
 
-    <cache name="customer" maxElementsInMemory="10" eternal="true" overflowToDisk="false" />  
+	<defaultCache eternal="true" maxElementsInMemory="100"
+		overflowToDisk="false" />
 
- </ehcache>
+	<cache name="customer" maxElementsInMemory="10" eternal="true"
+		overflowToDisk="false" statistics="true" />
+
+	<cache name="sampleCache2" eternal="true" overflowToDisk="true"
+		memoryStoreEvictionPolicy="FIFO" statistics="true" />
+
+</ehcache>

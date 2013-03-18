@@ -2,10 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>fr.dr</groupId>
-	<artifactId>sandbox</artifactId>
+	<artifactId>spring-ehcache-demo</artifactId>
 	<packaging>war</packaging>
 	<version>1.0.0</version>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -31,23 +30,47 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
 			<version>${org.springframework.version}</version>
+			<exclusions>
+		         <exclusion>
+		            <groupId>commons-logging</groupId>
+		            <artifactId>commons-logging</artifactId>
+		         </exclusion>
+   	        </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>4.5</version>
+			<version>4.11</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>jcl-over-slf4j</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>runtime</scope>
+   </dependency>
+   <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>runtime</scope>
+   </dependency>
+   <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-log4j12</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>runtime</scope>
+   </dependency>
+		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
-			<version>1.2.14</version>
+			<version>1.2.16</version>
 		</dependency>
 		<!-- EhCache -->
 		<dependency>
 			<groupId>com.googlecode.ehcache-spring-annotations</groupId>
 			<artifactId>ehcache-spring-annotations</artifactId>
-			<version>1.2.0-M1</version>
+			<version>1.2.0</version>
 		</dependency>
 		<!-- CGLib is also required for EHCache -->
 		<dependency>
@@ -57,15 +80,19 @@
 		</dependency>
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<version>1.6.1</version>
+			<artifactId>ehcache-core</artifactId>
+			<version>2.3.3</version>
+		</dependency>
+		<dependency>
+		  <groupId>org.terracotta</groupId>
+		  <artifactId>ehcache-probe</artifactId>
+		  <version>1.0.2</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>3.0.1</version>
-			<type>jar</type>
-			<scope>compile</scope>
+			<scope>provided</scope>
 		</dependency>
 		<!-- CRASH dependencies -->
 		<dependency>
@@ -74,6 +101,12 @@
 			<version>1.1.0</version>
 			<type>jar</type>
 			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+		            <groupId>javax.servlet</groupId>
+		            <artifactId>servlet-api</artifactId>
+		         </exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.crsh</groupId>
@@ -89,14 +122,25 @@
 			<type>war</type>
 			<classifier>spring</classifier>
 			<scope>compile</scope>
+			<exclusions>
+		         <exclusion>
+		            <groupId>commons-logging</groupId>
+		            <artifactId>commons-logging</artifactId>
+		         </exclusion>
+		         <exclusion>
+		            <groupId>javax.servlet</groupId>
+		            <artifactId>servlet-api</artifactId>
+		         </exclusion>
+   	        </exclusions>
 		</dependency>
 	</dependencies>
 	<build>
+		<finalName>demo</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.0</version>
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
@@ -105,15 +149,49 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<version>2.1.1</version>
+				<version>2.3</version>
 				<configuration>
 					<warName>demo</warName>
 				</configuration>
 			</plugin>
+			<plugin>
+				<!-- mvn -D jetty.port=8181 jetty:run 
+					http://localhost:8181/demo/
+				-->
+  					<groupId>org.mortbay.jetty</groupId>
+  					<artifactId>jetty-maven-plugin</artifactId>
+  					<version>8.1.9.v20130131</version>
+  					<!--  
+				  	<artifactId>maven-jetty-plugin</artifactId>
+  					<version>6.1.26</version>
+  					-->
+			</plugin>
+			<plugin>
+			<!--  java -jar ./target/demo-exec.jar  
+				http://localhost:8080/demo/
+			-->
+			<groupId>org.apache.tomcat.maven</groupId>
+        <artifactId>tomcat7-maven-plugin</artifactId>
+        <version>2.1</version>
+        <executions>
+          <execution>
+            <id>tomcat-run</id>
+            <goals>
+              <goal>exec-war-only</goal>
+            </goals>
+            <phase>package</phase>
+            <configuration>
+            	<path>/demo</path>
+            	<finalName>demo-exec.jar</finalName>
+            </configuration>
+            </execution>
+            </executions>
+            </plugin>
 		</plugins>
 	</build>
 	<properties>
 		<org.springframework.version>3.1.1.RELEASE</org.springframework.version>
+		<slf4j.version>1.5.8</slf4j.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
 </project>
